@@ -1,4 +1,4 @@
-import utils.DBUtil;
+import com.example.miniblognoframework.utils.DBUtil;
 
 import java.sql.Connection;
 
