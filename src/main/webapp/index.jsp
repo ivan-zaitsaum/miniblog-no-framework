@@ -10,51 +10,60 @@
     <style>
         /* Общий фон страницы — серый */
         body {
-            font-family: 'Courier New', monospace;  /* шрифт, напоминающий код */
-            background-color: #808080;  /* серый фон */
-            color: #ffffff;             /* по умолчанию белый текст */
+            font-family: 'Courier New', monospace;
+            background-color: #808080;
+            color: #ffffff;
             padding: 20px;
             margin: 0;
         }
-
-        /* Стили для навигации */
-        .nav {
-            margin-bottom: 20px;
-        }
+        /* Навигация */
+        .nav { margin-bottom: 20px; }
         .nav a {
             text-decoration: none;
-            color: #00ff00; /* ярко-зелёный для ссылок */
+            color: #00ff00;
             margin-right: 15px;
         }
         #user-info {
             float: right;
             font-size: 14px;
         }
-
-        /* Стили карточки поста */
+        /* Поисковая панель */
+        .search-bar {
+            margin: 20px 0;
+        }
+        .search-bar input[type="text"] {
+            padding: 5px;
+            width: 200px;
+            border: 1px solid #00ff00;
+            border-radius: 4px;
+            background: #333;
+            color: #fff;
+        }
+        .search-bar button {
+            padding: 5px 10px;
+            background: #00ff00;
+            color: #000;
+            border: none;
+            border-radius: 4px;
+        }
+        /* Карточки постов */
         .post {
-            background-color: #2b2b2b; /* чёрный фон карточки */
+            background-color: #2b2b2b;
             border: 1px solid #444444;
-            border-radius: 10px;         /* скруглённые углы */
+            border-radius: 10px;
             padding: 15px;
             margin-bottom: 15px;
         }
-
         .post h2 {
-            color: #00ff00;             /* ярко-зелёный заголовок */
+            color: #00ff00;
             margin-bottom: 10px;
         }
-
-        .post p {
-            color: #d3d3d3;             /* светло-серый текст для контента */
-        }
-
+        .post p { color: #d3d3d3; }
         .date {
             font-size: 12px;
-            color: #aaaaaa;             /* еще более светлый оттенок для даты */
+            color: #aaaaaa;
         }
-
-        /* Стили для комментариев */
+        /* Комментарии */
         .comments {
             margin-top: 10px;
             padding-top: 10px;
@@ -65,19 +74,9 @@
             padding-left: 10px;
             border-left: 3px solid #00ff00;
         }
-        .comment-author {
-            font-weight: bold;
-            color: #00ff00;
-        }
-        .comment-time {
-            font-size: 12px;
-            color: #bbbbbb;
-        }
-
-        /* Стили для формы комментариев */
-        .comment-form {
-            margin-top: 10px;
-        }
+        .comment-author { font-weight: bold; color: #00ff00; }
+        .comment-time { font-size: 12px; color: #bbbbbb; }
+        .comment-form { margin-top: 10px; }
     </style>
 </head>
 <body>
@@ -106,6 +105,19 @@
 <h1>Mini Blog</h1>
 <hr>
 
+<!-- 1) Поисковая форма -->
+<div class="search-bar">
+    <form action="<%= request.getContextPath() %>/posts" method="get">
+        <input type="text"
+               name="q"
+               placeholder="Search..."
+               value="<%= request.getAttribute("searchQuery") != null
+                             ? request.getAttribute("searchQuery")
+                             : "" %>" />
+        <button type="submit">Search</button>
+    </form>
+</div>
+
 <%
     List<Post> posts = (List<Post>) request.getAttribute("posts");
     if (posts != null && !posts.isEmpty()) {
@@ -116,32 +128,34 @@
     <h2><%= post.getTitle() %></h2>
     <p><%= post.getContent() %></p>
     <p class="date">
-        Created at: <%= post.getCreatedAt() %> &nbsp;&nbsp;|&nbsp;&nbsp;
+        Created at: <%= post.getCreatedAt() %> &nbsp;|&nbsp;
         Author: <%= post.getUsername() != null ? post.getUsername() : "Unknown" %>
     </p>
 
-    <%-- Если текущий пользователь является автором, можно добавить кнопки Edit, Delete --%>
     <% if (currentUser != null && currentUser.getId() == post.getUserId()) { %>
-    <a href="<%= request.getContextPath() %>/edit-post?id=<%= post.getId() %>" style="color: #00ff00;">Edit</a> |
-    <a href="<%= request.getContextPath() %>/delete-post?id=<%= post.getId() %>" style="color: #00ff00;">Delete</a>
+    <a href="<%= request.getContextPath() %>/edit-post?id=<%= post.getId() %>"
+       style="color:#00ff00;">Edit</a> |
+    <a href="<%= request.getContextPath() %>/delete-post?id=<%= post.getId() %>"
+       style="color:#00ff00;">Delete</a>
     <% } %>
 
-    <!-- Вывод комментариев для данного поста -->
+    <!-- Комментарии -->
     <%
         List<Comment> comments = commentDAO.getCommentsByPostId(post.getId());
         if (comments != null && !comments.isEmpty()) {
     %>
     <div class="comments">
-        <h5 style="color: #00ff00;">Comments:</h5>
-        <ul style="list-style: none; padding-left: 0;">
+        <h5 style="color:#00ff00;">Comments:</h5>
+        <ul style="list-style:none; padding-left:0;">
             <%
-                for (Comment comment : comments) {
+                for (Comment c : comments) {
             %>
             <li class="comment">
-                <p><%= comment.getContent() %></p>
+                <p><%= c.getContent() %></p>
                 <small class="comment-time">
-                    By <span class="comment-author"><%= comment.getUsername() != null ? comment.getUsername() : "Unknown" %></span>
-                    at <%= comment.getCreatedAt() %>
+                    By <span class="comment-author">
+                            <%= c.getUsername() != null ? c.getUsername() : "Unknown" %>
+                        </span> at <%= c.getCreatedAt() %>
                 </small>
             </li>
             <%
@@ -149,22 +163,30 @@
             %>
         </ul>
     </div>
-    <%
-        }
-    %>
+    <% } %>
 
-    <%-- Форма для добавления нового комментария (только для залогиненных пользователей) --%>
     <% if (currentUser != null) { %>
     <div class="comment-form">
         <form method="post" action="<%= request.getContextPath() %>/add-comment">
             <input type="hidden" name="postId" value="<%= post.getId() %>">
-            <textarea name="comment" rows="2" cols="50" required placeholder="Enter your comment..." style="background-color: #333; color: #fff; border: 1px solid #00ff00; border-radius: 5px; padding: 5px;"></textarea>
+            <textarea name="comment" rows="2" cols="50" required
+                      placeholder="Enter your comment..."
+                      style="background:#333;color:#fff;border:1px solid #00ff00;
+                                 border-radius:5px;padding:5px;"></textarea>
             <br><br>
-            <button type="submit" style="background-color: #00ff00; color: #000; border: none; padding: 5px 10px; border-radius: 5px;">Submit Comment</button>
+            <button type="submit"
+                    style="background:#00ff00;color:#000;border:none;
+                               padding:5px 10px;border-radius:5px;">
+                Submit Comment
+            </button>
         </form>
     </div>
     <% } else { %>
-    <p><a href="<%= request.getContextPath() %>/login.jsp" style="color: #00ff00;">Log in</a> to comment.</p>
+    <p>
+        <a href="<%= request.getContextPath() %>/login.jsp" style="color:#00ff00;">
+            Log in
+        </a> to comment.
+    </p>
     <% } %>
 </div>
 <hr>
