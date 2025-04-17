@@ -2,42 +2,43 @@
 <html>
 <head>
   <title>Registration</title>
+
+  <!-- 1) Общий CSS для тем -->
+  <link rel="stylesheet" href="${pageContext.request.contextPath}/css/theme.css">
+
+  <!-- 2) Локальные стили формы регистрации (используют CSS-переменные) -->
   <style>
-    /* Общий стиль страницы */
     body {
-      background-color: #808080; /* серый фон */
+      margin: 0; padding: 20px;
+      background-color: var(--bg-color);
+      color: var(--text-color);
       font-family: 'Courier New', monospace;
-      color: #ffffff;
-      padding: 20px;
-      margin: 0;
     }
-    /* Навигационное меню */
     .nav {
       margin-bottom: 20px;
     }
     .nav a {
       text-decoration: none;
-      color: #00ff00; /* ярко-зелёный */
+      color: var(--link-color);
       margin-right: 15px;
     }
-    /* Стиль контейнера формы - черная карточка */
     .form-container {
-      background-color: #2b2b2b; /* черный фон карточки */
-      border: 1px solid #00ff00;
+      background-color: var(--card-bg);
+      border: 1px solid var(--link-color);
       border-radius: 10px;
       padding: 20px;
       width: 400px;
-      margin: 50px auto; /* центрирование по горизонтали */
+      margin: 50px auto;
     }
     .form-container h1 {
       text-align: center;
-      color: #00ff00;
+      color: var(--link-color);
       margin-bottom: 20px;
     }
     .form-container label {
       display: block;
       margin-bottom: 5px;
-      color: #00ff00;
+      color: var(--link-color);
     }
     .form-container input[type="text"],
     .form-container input[type="email"],
@@ -45,19 +46,19 @@
       width: 100%;
       padding: 8px;
       margin-bottom: 10px;
-      border: 1px solid #00ff00;
+      border: 1px solid var(--link-color);
       border-radius: 5px;
-      background-color: #333333;
-      color: #ffffff;
+      background-color: var(--card-bg);
+      color: var(--text-color);
     }
     .form-container input[type="submit"] {
       width: 100%;
       padding: 10px;
-      background-color: #00ff00;
+      background-color: var(--link-color);
       border: none;
       border-radius: 5px;
       font-weight: bold;
-      color: #000000;
+      color: var(--bg-color);
       cursor: pointer;
     }
     .back-link {
@@ -65,38 +66,63 @@
       margin-top: 20px;
     }
     .back-link a {
-      color: #00ff00;
+      color: var(--link-color);
       text-decoration: none;
     }
+
+    /* Кнопка переключения темы */
+    #theme-toggle {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      background: var(--link-color);
+      color: var(--bg-color);
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      z-index: 1000;
+    }
   </style>
+
+  <!-- 3) Скрипт для переключения темы -->
+  <script src="${pageContext.request.contextPath}/js/theme.js" defer></script>
 </head>
 <body>
+<!-- 4) Кнопка-переключатель темы -->
+<button id="theme-toggle" onclick="toggleTheme()">Toggle Theme</button>
+
 <!-- Навигация -->
 <div class="nav">
   <a href="<%= request.getContextPath() %>/posts">Main</a> |
   <a href="<%= request.getContextPath() %>/login.jsp">Login</a>
 </div>
 
-<!-- Контейнер формы регистрации -->
+<!-- Форма регистрации -->
 <div class="form-container">
   <h1>User Registration</h1>
   <form action="<%= request.getContextPath() %>/register" method="post">
     <label for="username">Username:</label>
-    <input type="text" id="username" name="username" required>
+    <input type="text" id="username"   name="username" required>
 
     <label for="email">Email:</label>
-    <input type="email" id="email" name="email" required>
+    <input type="email" id="email"      name="email"    required>
 
     <label for="password">Password:</label>
     <input type="password" id="password" name="password" required>
 
     <input type="submit" value="Register">
   </form>
-  <p style="text-align: center;">Already registered? <a href="<%= request.getContextPath() %>/login.jsp" style="color: #00ff00;">Login</a></p>
+  <p style="text-align:center;">
+    Already registered?
+    <a href="<%= request.getContextPath() %>/login.jsp">Login</a>
+  </p>
 </div>
 
 <div class="back-link">
-  <p><a href="<%= request.getContextPath() %>/posts">Back to Home Page</a></p>
+  <p>
+    <a href="<%= request.getContextPath() %>/posts">Back to Home Page</a>
+  </p>
 </div>
 </body>
 </html>

@@ -1,0 +1,34 @@
+:root {
+    --bg-color:      #f0f0f0;
+    --text-color:    #222;
+    --link-color:    #0066cc;
+    --card-bg:       #fff;
+    --card-border:   #ccc;
+
+
+    --text-muted:    #555;
+    --text-faint:    #888;
+}
+
+body.dark {
+    --bg-color:      #222;
+    --text-color:    #eee;
+    --link-color:    #4fa;
+    --card-bg:       #333;
+    --card-border:   #555;
+
+    --text-muted:    #ccc;
+    --text-faint:    #aaa;
+}
+
+body {
+    background-color: var(--bg-color);
+    color:            var(--text-color);
+    margin: 0;
+    padding: 20px;
+    font-family: 'Courier New', monospace;
+}
+
+a {
+    color: var(--link-color);
+}
