@@ -22,7 +22,7 @@ public class RegistrationServlet extends HttpServlet {
         String email = request.getParameter("email");
         String password = request.getParameter("password");
 
-        User user = new User(username, email, password);
+        User user = new User(username, email, password, "User");
         userDAO.addUser(user);
 
         // Перенаправляем на страницу логина после регистрации
