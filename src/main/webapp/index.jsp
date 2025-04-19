@@ -5,6 +5,11 @@
 <%@ page import="com.example.miniblognoframework.model.User" %>
 <%@ page import="com.example.miniblognoframework.dao.CommentDAO" %>
 <%@ page import="com.example.miniblognoframework.model.Comment" %>
+<%@ page import="com.example.miniblognoframework.dao.PostCategoryDAO" %>
+<%@ page import="com.example.miniblognoframework.dao.PostTagDAO" %>
+<%@ page import="com.example.miniblognoframework.model.Category" %>
+<%@ page import="com.example.miniblognoframework.model.Tag" %>
+
 <html>
 <head>
     <title>Mini Blog</title>
@@ -30,6 +35,30 @@
         #theme-toggle { position: fixed; top: 10px; right: 10px; background: var(--link-color); color: var(--bg-color); border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; z-index: 1000; }
         .pagination a { margin: 0 4px; text-decoration: none; }
         .pagination a.active { font-weight: bold; }
+        .category-label {
+            display: inline-block;
+            padding: 2px 6px;
+            margin-right: 4px;
+            border-radius: 4px;
+            background: #eef;
+            font-size: 12px;
+
+            /* вот оно — цвет текста */
+            color: #000000;
+        }
+
+        .tag-label {
+            display: inline-block;
+            padding: 2px 6px;
+            margin-right: 4px;
+            border-radius: 4px;
+            background: #fee;
+            font-size: 12px;
+
+            /* и тут */
+            color: #000000;
+        }
+
     </style>
     <script src="${pageContext.request.contextPath}/js/theme.js" defer></script>
 </head>
@@ -66,6 +95,11 @@
     </form>
     <a href="${pageContext.request.contextPath}/posts" class="btn-all">All Posts</a>
 </div>
+<%
+    // DAO для выборки категорий и тегов
+    PostCategoryDAO catDao = new PostCategoryDAO();
+    PostTagDAO      tagDao = new PostTagDAO();
+%>
 
 <%
     List<Post> posts = (List<Post>) request.getAttribute("posts");
@@ -80,6 +114,44 @@
         Created at: <%= post.getCreatedAt() %> |
         Author: <%= post.getUsername() != null ? post.getUsername() : "Unknown" %>
     </p>
+    <!-- Показываем категории -->
+    <%
+        List<Category> cats = catDao.getCategoriesByPostId(post.getId());
+        if (!cats.isEmpty()) {
+    %>
+    <p>
+        Categories:
+        <%
+            for (Category c : cats) {
+        %>
+        <span class="category-label"><%= c.getName() %></span>
+        <%
+            }
+        %>
+    </p>
+    <%
+        }
+    %>
+
+    <!-- Показываем теги -->
+    <%
+        List<Tag> tags = tagDao.getTagsByPostId(post.getId());
+        if (!tags.isEmpty()) {
+    %>
+    <p>
+        Tags:
+        <%
+            for (Tag t : tags) {
+        %>
+        <span class="tag-label"><%= t.getName() %></span>
+        <%
+            }
+        %>
+    </p>
+    <%
+        }
+    %>
+
     <% if (currentUser != null && currentUser.getId() == post.getUserId()) { %>
     <a href="${pageContext.request.contextPath}/edit-post?id=<%= post.getId() %>"
        style="color:var(--link-color)">Edit</a> |

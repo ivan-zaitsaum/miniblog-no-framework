@@ -1,5 +1,6 @@
 package com.example.miniblognoframework.dao;
 
+import com.example.miniblognoframework.model.Tag;
 import com.example.miniblognoframework.utils.DBUtil;
 
 import java.sql.*;
@@ -50,5 +51,29 @@ public class PostTagDAO {
             throw new RuntimeException("Ошибка сохранения тегов поста", e);
         }
     }
+
+    public List<Tag> getTagsByPostId(int postId) {
+        List<Tag> out = new ArrayList<>();
+        String sql = "SELECT t.id, t.name " +
+                "FROM tags t " +
+                "JOIN post_tags pt ON pt.tag_id=t.id " +
+                "WHERE pt.post_id=?";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, postId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Tag t = new Tag();
+                    t.setId(rs.getInt("id"));
+                    t.setName(rs.getString("name"));
+                    out.add(t);
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return out;
+    }
+
 
 }

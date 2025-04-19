@@ -1,5 +1,6 @@
 package com.example.miniblognoframework.dao;
 
+import com.example.miniblognoframework.model.Category;
 import com.example.miniblognoframework.utils.DBUtil;
 
 import java.sql.*;
@@ -49,5 +50,27 @@ public class PostCategoryDAO {
         } catch (SQLException e) {
             throw new RuntimeException("Ошибка сохранения категорий поста", e);
         }
+    }
+    public List<Category> getCategoriesByPostId(int postId) {
+        List<Category> out = new ArrayList<>();
+        String sql = "SELECT c.id, c.name " +
+                "FROM categories c " +
+                "JOIN post_categories pc ON pc.category_id=c.id " +
+                "WHERE pc.post_id=?";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, postId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Category c = new Category();
+                    c.setId(rs.getInt("id"));
+                    c.setName(rs.getString("name"));
+                    out.add(c);
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return out;
     }
 }
