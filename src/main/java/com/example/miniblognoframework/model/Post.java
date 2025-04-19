@@ -1,6 +1,8 @@
 package com.example.miniblognoframework.model;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Post {
     private int id;
@@ -8,7 +10,12 @@ public class Post {
     private String content;
     private LocalDateTime createdAt;
     private int userId;          // ID автора
-    private String username;     // Имя автора (для отображения)
+    private String username;
+    private String status;              // "DRAFT" или "PUBLISHED"
+    private LocalDateTime publishDate;
+    private List<Integer> categoryIds = new ArrayList<>();
+    private List<Integer> tagIds      = new ArrayList<>();
+
 
     public Post() {}
 
@@ -61,4 +68,31 @@ public class Post {
     public void setUsername(String username) {
         this.username = username;
     }
+    public String getStatus() {
+        return status;
+    }
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public LocalDateTime getPublishDate() {
+        return publishDate;
+    }
+    public void setPublishDate(LocalDateTime publishDate) {
+        this.publishDate = publishDate;
+    }
+    public List<Integer> getCategoryIds() {
+        return categoryIds;
+    }
+    public void setCategoryIds(List<Integer> categoryIds) {
+        this.categoryIds = categoryIds;
+    }
+
+    public List<Integer> getTagIds() {
+        return tagIds;
+    }
+    public void setTagIds(List<Integer> tagIds) {
+        this.tagIds = tagIds;
+    }
 }
+

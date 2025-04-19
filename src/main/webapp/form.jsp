@@ -1,13 +1,13 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page import="java.util.List" %>
 <%@ page import="com.example.miniblognoframework.model.User" %>
+<%@ page import="com.example.miniblognoframework.model.Category" %>
+<%@ page import="com.example.miniblognoframework.model.Tag" %>
+
 <html>
 <head>
     <title>Add Post</title>
-
-    <!-- 1) Общий CSS для тем -->
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/theme.css">
-
-    <!-- 2) Локальные стили формы, теперь на переменных -->
     <style>
         body {
             background-color: var(--bg-color);
@@ -90,43 +90,92 @@
         }
     </style>
 
-    <!-- 4) Скрипт переключения темы -->
     <script src="${pageContext.request.contextPath}/js/theme.js" defer></script>
 </head>
 <body>
-<!-- 5) Кнопка-переключатель -->
-<button id="theme-toggle" onclick="toggleTheme()">Toggle Theme</button>
-
-<!-- Header с инфой о пользователе -->
 <div id="header">
     <%
         User user = (User) session.getAttribute("user");
-        if (user != null) {
+        if (user!=null) {
     %>
-    Welcome, <strong><%= user.getUsername() %></strong>!
-    <a href="<%= request.getContextPath() %>/logout">Logout</a>
-    <% } else { %>
-    <a href="<%= request.getContextPath() %>/login.jsp">Login</a>
-    <a href="<%= request.getContextPath() %>/registration.jsp">Register</a>
-    <% } %>
+    Welcome, <strong><%=user.getUsername()%></strong>!
+    <a href="<%=request.getContextPath()%>/logout">Logout</a>
+    <%
+    } else {
+    %>
+    <a href="<%=request.getContextPath()%>/login.jsp">Login</a>
+    <a href="<%=request.getContextPath()%>/registration.jsp">Register</a>
+    <%
+        }
+    %>
 </div>
 
-<!-- Форма добавления поста -->
 <div class="form-container">
+
+    <!-- ==== 1) Форма добавления категории ==== -->
+    <h2>Add Category</h2>
+    <form method="post" action="${pageContext.request.contextPath}/add-category">
+        <input type="text" name="name" placeholder="Category name" required/>
+        <button type="submit">Add Category</button>
+    </form>
+
+    <hr/>
+
+    <!-- ==== 2) Форма добавления тега ==== -->
+    <h2>Add Tag</h2>
+    <form method="post" action="${pageContext.request.contextPath}/add-tag">
+        <input type="text" name="name" placeholder="Tag name" required/>
+        <button type="submit">Add Tag</button>
+    </form>
+
+    <hr/>
+
+    <!-- ==== 3) Основная форма создания поста ==== -->
     <h1>Add a New Post</h1>
-    <form method="post" action="<%= request.getContextPath() %>/add-post">
+    <form method="post" action="${pageContext.request.contextPath}/add-post">
         <label for="title">Title:</label>
-        <input type="text" id="title" name="title" required>
+        <input type="text" id="title" name="title" required/>
 
         <label for="content">Content:</label>
         <textarea id="content" name="content" rows="5" required></textarea>
 
-        <button type="submit">Submit</button>
+        <!-- Существующие категории -->
+        <fieldset>
+            <legend>Categories</legend>
+            <%
+                List<Category> cats = (List<Category>)request.getAttribute("allCategories");
+                if (cats!=null) for (Category c:cats) {
+            %>
+            <label>
+                <input type="checkbox" name="categoryIds" value="<%=c.getId()%>"/>
+                <%=c.getName()%>
+            </label><br/>
+            <%
+                    }
+            %>
+        </fieldset>
+
+        <!-- Существующие теги -->
+        <fieldset>
+            <legend>Tags</legend>
+            <%
+                List<Tag> tags = (List<Tag>)request.getAttribute("allTags");
+                if (tags!=null) for (Tag t:tags) {
+            %>
+            <label>
+                <input type="checkbox" name="tagIds" value="<%=t.getId()%>"/>
+                <%=t.getName()%>
+            </label><br/>
+            <%
+                    }
+            %>
+        </fieldset>
+
+        <button type="submit">Submit Post</button>
     </form>
+
 </div>
 
-<div class="back-link">
-    <p><a href="<%= request.getContextPath() %>/posts">Back to Home Page</a></p>
-</div>
+<p><a href="<%=request.getContextPath()%>/posts">Back to Home Page</a></p>
 </body>
 </html>
