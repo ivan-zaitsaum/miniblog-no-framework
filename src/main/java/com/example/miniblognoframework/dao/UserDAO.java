@@ -45,7 +45,7 @@ public class UserDAO {
      * @return объект User или null, если не найден.
      */
     public User getUserByUsername(String username) {
-        String sql = "SELECT id, username, email, password, role FROM users WHERE username = ?";
+        String sql = "SELECT id, username, email, password, role, avatar FROM users WHERE username = ?";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
@@ -56,8 +56,9 @@ public class UserDAO {
                     user.setId(rs.getInt("id"));
                     user.setUsername(rs.getString("username"));
                     user.setEmail(rs.getString("email"));
-                    user.setPassword(rs.getString("password")); // здесь хранится хеш
+                    user.setPassword(rs.getString("password")); // тут хранится хеш
                     user.setRole(rs.getString("role"));
+                    user.setAvatar(rs.getString("avatar"));     // <— новая строка
                     return user;
                 }
             }
@@ -66,7 +67,6 @@ public class UserDAO {
         }
         return null;
     }
-
     /**
      * Аутентифицирует пользователя: ищет его по имени, затем проверяет пароль через BCrypt.
      * @return объект User, если пароль совпал, иначе null.
@@ -87,13 +87,31 @@ public class UserDAO {
         String sql = "UPDATE users SET avatar = ? WHERE id = ?";
         try (Connection c = getConnection();
              PreparedStatement ps = c.prepareStatement(sql)) {
-
             ps.setString(1, filename);
-            ps.setInt(   2, userId);
+            ps.setInt(2, userId);
             ps.executeUpdate();
-
         } catch (SQLException e) {
-            throw new RuntimeException("Ошибка при сохранении аватара", e);
+            throw new RuntimeException("Ошибка сохранения аватара", e);
+        }
+    }
+
+    public User findById(int userId) {
+        String sql = "SELECT id, username, email, avatar FROM users WHERE id = ?";
+        try (Connection c = getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                User u = new User();
+                u.setId(rs.getInt("id"));
+                u.setUsername(rs.getString("username"));
+                u.setEmail(rs.getString("email"));
+                u.setAvatar(rs.getString("avatar"));
+                return u;
+            }
+            return null;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
     }
 }

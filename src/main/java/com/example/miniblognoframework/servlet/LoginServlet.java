@@ -24,9 +24,13 @@ public class LoginServlet extends HttpServlet {
 
         User user = userDAO.authenticateUser(username, password);
         if (user != null) {
-            // Получаем сессию (создаём, если её нет)
+            // вместо session.setAttribute("user", user):
+            // загрузим из БД всю информацию, включая avatar
+            User fullUser = userDAO.findById(user.getId());
+
             HttpSession session = request.getSession(true);
-            session.setAttribute("user", user); // сохраняем пользователя в сессии
+            session.setAttribute("user", fullUser);
+
             response.sendRedirect(request.getContextPath() + "/posts");
         } else {
             response.sendRedirect(request.getContextPath() + "/login.jsp?error=1");

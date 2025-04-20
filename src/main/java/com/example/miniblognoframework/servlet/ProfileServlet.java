@@ -6,15 +6,17 @@ import com.example.miniblognoframework.model.User;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
+
 import java.io.IOException;
 import java.util.List;
 
 @WebServlet("/profile")
 public class ProfileServlet extends HttpServlet {
+
     private PostDAO postDAO;
 
     @Override
-    public void init() throws ServletException {
+    public void init() {
         postDAO = new PostDAO();
     }
 
@@ -26,12 +28,11 @@ public class ProfileServlet extends HttpServlet {
             resp.sendRedirect(req.getContextPath() + "/login.jsp");
             return;
         }
-
         User user = (User) session.getAttribute("user");
-        // Получаем список постов текущего пользователя
+        // загружаем его посты
         List<Post> myPosts = postDAO.getPostsByUserId(user.getId());
-
         req.setAttribute("myPosts", myPosts);
-        req.getRequestDispatcher("/WEB-INF/profile.jsp").forward(req, resp);
+        req.getRequestDispatcher("/WEB-INF/profile.jsp")
+                .forward(req, resp);
     }
 }
