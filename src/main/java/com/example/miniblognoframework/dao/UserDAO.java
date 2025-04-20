@@ -8,6 +8,10 @@ import java.sql.*;
 
 public class UserDAO {
 
+    private static final String URL      = "jdbc:mysql://localhost:3306/miniblog";
+    private static final String USER     = "root";
+    private static final String PASSWORD = "Krem1978_";
+
     /**
      * Создаёт нового пользователя в БД, хешируя пароль через BCrypt.
      */
@@ -73,5 +77,23 @@ public class UserDAO {
             return user;
         }
         return null;
+    }
+
+    private Connection getConnection() throws SQLException {
+        return DriverManager.getConnection(URL, USER, PASSWORD);
+    }
+
+    public void updateAvatar(int userId, String filename) {
+        String sql = "UPDATE users SET avatar = ? WHERE id = ?";
+        try (Connection c = getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+
+            ps.setString(1, filename);
+            ps.setInt(   2, userId);
+            ps.executeUpdate();
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Ошибка при сохранении аватара", e);
+        }
     }
 }

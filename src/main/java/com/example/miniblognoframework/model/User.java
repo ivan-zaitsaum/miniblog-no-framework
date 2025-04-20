@@ -6,6 +6,7 @@ public class User {
     private String email;
     private String password;
     private String role;
+    private String avatar;
 
     public User() {}
 
@@ -51,4 +52,6 @@ public class User {
     }
     public String getRole() {return role;}
     public void setRole(String role) {this.role = role;}
+    public String getAvatar() {return avatar;}
+    public void setAvatar(String avatar) {this.avatar = avatar;}
 }

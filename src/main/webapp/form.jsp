@@ -112,23 +112,7 @@
 
 <div class="form-container">
 
-    <!-- ==== 1) Форма добавления категории ==== -->
-    <h2>Add Category</h2>
-    <form method="post" action="${pageContext.request.contextPath}/add-category">
-        <input type="text" name="name" placeholder="Category name" required/>
-        <button type="submit">Add Category</button>
-    </form>
 
-    <hr/>
-
-    <!-- ==== 2) Форма добавления тега ==== -->
-    <h2>Add Tag</h2>
-    <form method="post" action="${pageContext.request.contextPath}/add-tag">
-        <input type="text" name="name" placeholder="Tag name" required/>
-        <button type="submit">Add Tag</button>
-    </form>
-
-    <hr/>
 
     <!-- ==== 3) Основная форма создания поста ==== -->
     <h1>Add a New Post</h1>
@@ -173,6 +157,23 @@
 
         <button type="submit">Submit Post</button>
     </form>
+
+    <h2>Add Category</h2>
+    <form method="post" action="${pageContext.request.contextPath}/add-category">
+        <input type="text" name="name" placeholder="Category name" required/>
+        <button type="submit">Add Category</button>
+    </form>
+
+    <hr/>
+
+    <!-- ==== 2) Форма добавления тега ==== -->
+    <h2>Add Tag</h2>
+    <form method="post" action="${pageContext.request.contextPath}/add-tag">
+        <input type="text" name="name" placeholder="Tag name" required/>
+        <button type="submit">Add Tag</button>
+    </form>
+
+    <hr/>
 
 </div>
 

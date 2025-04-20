@@ -219,4 +219,30 @@ public class PostDAO {
             throw new RuntimeException("Ошибка удаления поста", e);
         }
     }
+
+    public List<Post> getPostsByUserId(int userId) {
+        List<Post> posts = new ArrayList<>();
+        String sql = "SELECT p.id, p.title, p.content, p.created_at, u.username "
+                + "FROM posts p LEFT JOIN users u ON p.user_id=u.id "
+                + "WHERE p.user_id=? ORDER BY p.created_at DESC";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, userId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Post p = new Post();
+                    p.setId(rs.getInt("id"));
+                    p.setTitle(rs.getString("title"));
+                    p.setContent(rs.getString("content"));
+                    p.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
+                    p.setUsername(rs.getString("username"));
+                    posts.add(p);
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return posts;
+    }
+
 }

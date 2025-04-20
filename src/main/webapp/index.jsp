@@ -10,6 +10,11 @@
 <%@ page import="com.example.miniblognoframework.model.Category" %>
 <%@ page import="com.example.miniblognoframework.model.Tag" %>
 
+<%
+    // достаём из сессии залогиненного пользователя
+    User currentUser = (User) session.getAttribute("user");
+%>
+
 <html>
 <head>
     <title>Mini Blog</title>
@@ -68,20 +73,17 @@
 <div class="nav">
     <a href="${pageContext.request.contextPath}/posts">Home</a>
     <a href="${pageContext.request.contextPath}/add-post">Add Post</a>
-    <%
-        User currentUser = (User) session.getAttribute("user");
-        if (currentUser == null) {
-    %>
+    <% if (currentUser != null) { %>
+    <!-- вот что добавляем -->
+    <a href="${pageContext.request.contextPath}/profile">Profile</a>
+    <% } %>
+    <% if (currentUser == null) { %>
     <a href="${pageContext.request.contextPath}/registration.jsp">Registration</a>
     <a href="${pageContext.request.contextPath}/login.jsp">Login</a>
-    <%
-    } else {
-    %>
+    <% } else { %>
     Welcome, <strong><%= currentUser.getUsername() %></strong>!
     <a href="${pageContext.request.contextPath}/logout">Logout</a>
-    <%
-        }
-    %>
+    <% } %>
 </div>
 
 <h1>Mini Blog</h1>
