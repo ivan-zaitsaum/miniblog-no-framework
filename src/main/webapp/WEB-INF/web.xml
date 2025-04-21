@@ -9,7 +9,7 @@
         <welcome-file>posts</welcome-file>
     </welcome-file-list>
 
-    <!-- DefaultServlet: раздаёт всё из webapp-каталогов -->
+    <!-- DefaultServlet для статических ресурсов -->
     <servlet>
         <servlet-name>default</servlet-name>
         <servlet-class>org.apache.catalina.servlets.DefaultServlet</servlet-class>
@@ -24,10 +24,14 @@
         <load-on-startup>1</load-on-startup>
     </servlet>
 
-    <!-- Разрешаем отдавать статические ресурсы -->
+    <!-- Пути, по которым отдать статические файлы -->
     <servlet-mapping>
         <servlet-name>default</servlet-name>
         <url-pattern>/uploads/*</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>default</servlet-name>
+        <url-pattern>/images/*</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>default</servlet-name>
@@ -37,6 +41,7 @@
         <servlet-name>default</servlet-name>
         <url-pattern>/js/*</url-pattern>
     </servlet-mapping>
+
 
     <!-- Ваши остальные сервлеты и фильтры сюда -->
 </web-app>

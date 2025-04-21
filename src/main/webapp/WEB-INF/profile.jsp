@@ -14,15 +14,20 @@
     response.sendRedirect(request.getContextPath() + "/login.jsp");
     return;
   }
-  // 2) Список его постов и DAO для категорий/тегов
+
+  // 2) URL аватара: либо свой, либо дефолтный
+  String avatarFile = currentUser.getAvatar();
+  String avatarUrl  = request.getContextPath()
+          + ((avatarFile != null && !avatarFile.isEmpty())
+          ? "/uploads/" + avatarFile
+          : "/images/default-avatar.png");
+
+  // 3) Список его постов и DAO для категорий/тегов
   @SuppressWarnings("unchecked")
   List<Post> myPosts    = (List<Post>) request.getAttribute("myPosts");
   PostCategoryDAO catDao = new PostCategoryDAO();
   PostTagDAO     tagDao = new PostTagDAO();
-  // 3) Имя файла аватара
-  String avatar = currentUser.getAvatar();
 %>
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -41,6 +46,7 @@
       color:var(--link-color);
       text-decoration:none;
       margin-right:15px;
+      vertical-align: middle;
     }
     #theme-toggle {
       position:fixed; top:10px; right:10px;
@@ -48,6 +54,13 @@
       color:var(--bg-color);
       border:none; padding:6px 12px; border-radius:4px;
       cursor:pointer; z-index:1000;
+    }
+    .nav-avatar {
+      width:32px; height:32px;
+      border-radius:50%;
+      object-fit:cover;
+      vertical-align: middle;
+      margin-right:6px;
     }
     .card {
       background:var(--card-bg);
@@ -72,7 +85,7 @@
     }
     .post {
       background:var(--card-bg);
-      border:1px solid var(--border-color);
+      border:1px solid var(--card-border);
       border-radius:10px;
       padding:15px; margin-bottom:15px;
     }
@@ -96,6 +109,22 @@
       text-decoration:none;
       margin-right:10px;
     }
+    /* Кнопки */
+    .comment-form button,
+    .card button {
+      background: var(--link-color);
+      color: var(--bg-color);
+      border: none;
+      padding: 6px 12px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: opacity 0.2s;
+    }
+    .comment-form button:hover,
+    .card button:hover {
+      opacity: 0.8;
+    }
   </style>
   <script src="${pageContext.request.contextPath}/js/theme.js" defer></script>
 </head>
@@ -107,7 +136,8 @@
   <a href="${pageContext.request.contextPath}/posts">Home</a>
   <a href="${pageContext.request.contextPath}/add-post">Add Post</a>
   <a href="${pageContext.request.contextPath}/profile">Profile</a>
-  Welcome, <strong><%=currentUser.getUsername()%></strong>!
+  <img src="<%= avatarUrl %>" alt="Avatar" class="nav-avatar"/>
+  Welcome, <strong><%= currentUser.getUsername() %></strong>!
   <a href="${pageContext.request.contextPath}/logout">Logout</a>
 </div>
 
@@ -116,14 +146,7 @@
 
 <div class="card">
   <h1>Avatar</h1>
-
-  <%-- Если аватар есть, рендерим картинку --%>
-  <% if (avatar != null && !avatar.isEmpty()) { %>
-  <img
-          src="<%=request.getContextPath()%>/uploads/<%=avatar%>"
-          alt="Avatar"
-          class="avatar-img"/>
-  <% } %>
+  <img src="<%= avatarUrl %>" alt="Avatar" class="avatar-img"/>
 
   <form method="post"
         action="<%=request.getContextPath()%>/upload-avatar"
@@ -132,102 +155,71 @@
       Upload new avatar:
     </label><br/>
     <input type="file" id="avatarFile" name="avatarFile" accept="image/*" required/><br/><br/>
-    <button type="submit"
-            style="background:var(--link-color);
-                   color:var(--bg-color);
-                   border:none;
-                   padding:8px 16px;
-                   border-radius:5px;
-                   cursor:pointer;">
-      Save Avatar
-    </button>
+    <button type="submit">Save Avatar</button>
   </form>
 
-  <p><strong>Email:</strong>    <%=currentUser.getEmail()%></p>
+  <p><strong>Email:</strong> <%= currentUser.getEmail() %></p>
+
   <div id="username-display" style="margin-bottom:10px;">
-    <strong>Username:</strong> <span id="username-text"><%=currentUser.getUsername()%></span>
-    <button type="button" id="change-username-btn"
-            style="margin-left:10px;
-                 background:var(--link-color);
-                 color:var(--bg-color);
-                 border:none;
-                 padding:4px 8px;
-                 border-radius:4px;
-                 cursor:pointer;">
-      Change
-    </button>
+    <strong>Username:</strong>
+    <span id="username-text"><%= currentUser.getUsername() %></span>
+    <button type="button" id="change-username-btn">Change</button>
   </div>
 
-  <!-- Скрытая форма редактирования -->
   <div id="username-edit" style="display:none; margin-bottom:10px;">
     <form method="post"
           action="<%=request.getContextPath()%>/update-profile"
           style="display:inline-block;">
       <input type="text"
              name="username"
-             value="<%=currentUser.getUsername()%>"
+             value="<%= currentUser.getUsername() %>"
              required
              style="padding:4px; margin-right:6px;"/>
-      <button type="submit"
-              style="background:var(--link-color);
-                   color:var(--bg-color);
-                   border:none;
-                   padding:4px 8px;
-                   border-radius:4px;
-                   cursor:pointer;">
-        Save
-      </button>
+      <button type="submit">Save</button>
       <button type="button" id="cancel-username-btn"
-              style="margin-left:4px;
-                   background:#ccc;
-                   color:#000;
-                   border:none;
-                   padding:4px 8px;
-                   border-radius:4px;
-                   cursor:pointer;">
-        Cancel
-      </button>
+              style="background:#ccc; color:#000;">Cancel</button>
     </form>
   </div>
 </div>
-  <script>
-    // Показываем форму редактирования
-    document.getElementById('change-username-btn').addEventListener('click', function(){
-      document.getElementById('username-display').style.display = 'none';
-      document.getElementById('username-edit').style.display    = 'block';
-    });
-    // Отменяем изменение
-    document.getElementById('cancel-username-btn').addEventListener('click', function(){
-      document.getElementById('username-edit').style.display    = 'none';
-      document.getElementById('username-display').style.display = 'block';
-    });
-  </script>
+
+<script>
+  document.getElementById('change-username-btn').addEventListener('click', function(){
+    document.getElementById('username-display').style.display = 'none';
+    document.getElementById('username-edit').style.display    = 'block';
+  });
+  document.getElementById('cancel-username-btn').addEventListener('click', function(){
+    document.getElementById('username-edit').style.display    = 'none';
+    document.getElementById('username-display').style.display = 'block';
+  });
+</script>
 
 <h2>Your Posts</h2>
-<% if (myPosts == null || myPosts.isEmpty()) { %>
+<%
+  if (myPosts == null || myPosts.isEmpty()) {
+%>
 <p>You have no posts yet.
   <a href="<%=request.getContextPath()%>/add-post"
      style="color:var(--link-color)">Create one now</a>.
 </p>
-<% } else {
+<%
+} else {
   for (Post post : myPosts) {
     List<Category> cats = catDao.getCategoriesByPostId(post.getId());
     List<Tag>      tags = tagDao.getTagsByPostId(post.getId());
 %>
 <div class="post">
   <h2>
-    <a href="<%=request.getContextPath()%>/view-post?id=<%=post.getId()%>"
-       style="text-decoration:none;color:var(--link-color);">
-      <%=post.getTitle()%>
+    <a href="<%=request.getContextPath()%>/view-post?id=<%=post.getId()%>">
+      <%= post.getTitle() %>
     </a>
   </h2>
-  <p class="date">Created at: <%=post.getCreatedAt()%></p>
-  <p><%=post.getContent()%></p>
+  <p class="date">Created at: <%= post.getCreatedAt() %></p>
+  <p><%= post.getContent() %></p>
 
   <% if (!cats.isEmpty()) { %>
   <p><strong>Categories:</strong>
     <% for (Category c : cats) { %>
-    <span class="category-label"><%=c.getName()%></span>
+    <span class="category-label"><%= c.getName() %></span>
     <% } %>
   </p>
   <% } %>
@@ -235,7 +227,7 @@
   <% if (!tags.isEmpty()) { %>
   <p><strong>Tags:</strong>
     <% for (Tag t : tags) { %>
-    <span class="tag-label"><%=t.getName()%></span>
+    <span class="tag-label"><%= t.getName() %></span>
     <% } %>
   </p>
   <% } %>
@@ -245,7 +237,10 @@
     <a href="<%=request.getContextPath()%>/delete-post?id=<%=post.getId()%>">Delete</a>
   </div>
 </div>
-<% } } %>
+<%
+    }
+  }
+%>
 
 <p>
   <a href="<%=request.getContextPath()%>/posts"
