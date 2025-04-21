@@ -1,9 +1,9 @@
 package com.example.miniblognoframework.servlet;
 
-import com.example.miniblognoframework.dao.CategoryDAO;
-import com.example.miniblognoframework.dao.PostCategoryDAO;
 import com.example.miniblognoframework.dao.PostDAO;
+import com.example.miniblognoframework.dao.PostCategoryDAO;
 import com.example.miniblognoframework.dao.PostTagDAO;
+import com.example.miniblognoframework.dao.CategoryDAO;
 import com.example.miniblognoframework.dao.TagDAO;
 import com.example.miniblognoframework.model.Post;
 import com.example.miniblognoframework.model.User;
@@ -11,92 +11,76 @@ import com.example.miniblognoframework.model.User;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
+
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 @WebServlet("/add-post")
 public class AddPostServlet extends HttpServlet {
 
     private PostDAO postDAO;
+    private PostCategoryDAO pcDAO;
+    private PostTagDAO ptDAO;
     private CategoryDAO categoryDAO;
     private TagDAO tagDAO;
-    private PostCategoryDAO postCategoryDAO;
-    private PostTagDAO postTagDAO;
 
     @Override
-    public void init() {
-        postDAO          = new PostDAO();
-        categoryDAO      = new CategoryDAO();
-        tagDAO           = new TagDAO();
-        postCategoryDAO  = new PostCategoryDAO();
-        postTagDAO       = new PostTagDAO();
+    public void init() throws ServletException {
+        postDAO      = new PostDAO();
+        pcDAO        = new PostCategoryDAO();
+        ptDAO        = new PostTagDAO();
+        categoryDAO  = new CategoryDAO();
+        tagDAO       = new TagDAO();
     }
 
-    // Показываем форму создания (с подтянутыми allCategories и allTags)
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        // проверяем аутентификацию
-        HttpSession session = request.getSession(false);
-        if (session == null || session.getAttribute("user") == null) {
-            response.sendRedirect(request.getContextPath() + "/login.jsp");
-            return;
-        }
+        // Подготовить списки категорий и тегов
+        List categories = categoryDAO.findAll();
+        List tags       = tagDAO.findAll();
+        req.setAttribute("allCategories", categories);
+        req.setAttribute("allTags",       tags);
 
-        // подгружаем справочники
-        request.setAttribute("allCategories", categoryDAO.findAll());
-        request.setAttribute("allTags"      , tagDAO.findAll());
-
-        // никаких параметров — это создание нового поста
-        request.getRequestDispatcher("/form.jsp")
-                .forward(request, response);
+        // Показываем форму
+        req.getRequestDispatcher("/form.jsp")
+                .forward(req, resp);
     }
-
-
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         req.setCharacterEncoding("UTF-8");
-        User user = (User) req.getSession(false).getAttribute("user");
+        HttpSession session = req.getSession(false);
+        User user = (User) session.getAttribute("user");
 
-        // 1) Сохраняем пост и получаем его ID
+        // 1) Сохраняем сам пост
+        String title   = req.getParameter("title");
+        String content = req.getParameter("content");
         Post post = new Post();
-        post.setTitle(req.getParameter("title"));
-        post.setContent(req.getParameter("content"));
+        post.setTitle(title);
+        post.setContent(content);
         post.setUserId(user.getId());
-        postDAO.addPost(post);
-        int postId = post.getId();  // ← правильно полученный ID
+        postDAO.addPost(post);  // теперь post.getId() есть
 
-        // 2) Собираем все выбранные категории
-        List<Integer> cats = new ArrayList<>();
-        String[] existingCats = req.getParameterValues("categoryIds");
-        if (existingCats != null) {
-            for (String s : existingCats) cats.add(Integer.parseInt(s));
-        }
-        // 2.1) Создаём новую, если введено имя
-        String newCat = req.getParameter("newCategory");
-        if (newCat != null && !newCat.isBlank()) {
-            int newCatId = categoryDAO.addAndGetId(newCat.trim());
-            cats.add(newCatId);
-        }
-        postCategoryDAO.setCategories(postId, cats);
+        int postId = post.getId();
 
-        // 3) Аналогично для тегов
-        List<Integer> tags = new ArrayList<>();
-        String[] existingTags = req.getParameterValues("tagIds");
-        if (existingTags != null) {
-            for (String s : existingTags) tags.add(Integer.parseInt(s));
+        // 2) Категории: checkbox name="categoryIds"
+        String[] catIds = req.getParameterValues("categoryIds");
+        if (catIds != null) {
+            for (String cid : catIds) {
+                pcDAO.addMapping(postId, Integer.parseInt(cid));
+            }
         }
-        String newTag = req.getParameter("newTag");
-        if (newTag != null && !newTag.isBlank()) {
-            int newTagId = tagDAO.addAndGetId(newTag.trim());
-            tags.add(newTagId);
-        }
-        postTagDAO.setTags(postId, tags);
 
-        // 4) Переходим обратно на список
+        // 3) Теги: checkbox name="tagIds"
+        String[] tagIds = req.getParameterValues("tagIds");
+        if (tagIds != null) {
+            for (String tid : tagIds) {
+                ptDAO.addMapping(postId, Integer.parseInt(tid));
+            }
+        }
+
         resp.sendRedirect(req.getContextPath() + "/posts");
     }
 }

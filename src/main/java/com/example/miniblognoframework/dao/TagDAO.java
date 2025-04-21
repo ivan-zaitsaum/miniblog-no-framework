@@ -53,5 +53,18 @@ public class TagDAO {
         }
     }
 
+    public void addTag(String name) {
+        String sql = "INSERT INTO tags(name) VALUES(?)";
+        try (Connection c = DBUtil.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setString(1, name);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("Ошибка добавления тега", e);
+        }
+    }
+
+
+
 
 }

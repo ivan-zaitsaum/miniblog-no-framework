@@ -1,18 +1,20 @@
 package com.example.miniblognoframework.servlet;
 
 import com.example.miniblognoframework.dao.CategoryDAO;
+
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
+
 import java.io.IOException;
 
 @WebServlet("/add-category")
 public class AddCategoryServlet extends HttpServlet {
-    private CategoryDAO dao;
+    private CategoryDAO categoryDAO;
 
     @Override
     public void init() {
-        dao = new CategoryDAO();
+        categoryDAO = new CategoryDAO();
     }
 
     @Override
@@ -21,9 +23,9 @@ public class AddCategoryServlet extends HttpServlet {
         req.setCharacterEncoding("UTF-8");
         String name = req.getParameter("name");
         if (name != null && !name.isBlank()) {
-            dao.add(name.trim());
+            categoryDAO.addCategory(name.trim());
         }
-        // После создания редирект обратно на форму создания поста
+        // после добавления возвращаемся на ту же страницу с формой
         resp.sendRedirect(req.getContextPath() + "/add-post");
     }
 }

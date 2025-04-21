@@ -52,25 +52,37 @@ public class PostCategoryDAO {
         }
     }
     public List<Category> getCategoriesByPostId(int postId) {
-        List<Category> out = new ArrayList<>();
-        String sql = "SELECT c.id, c.name " +
-                "FROM categories c " +
-                "JOIN post_categories pc ON pc.category_id=c.id " +
-                "WHERE pc.post_id=?";
-        try (Connection conn = DBUtil.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        List<Category> result = new ArrayList<>();
+        String sql =
+                "SELECT c.id, c.name " +
+                        "FROM categories c " +
+                        "JOIN post_category pc ON c.id = pc.category_id " +
+                        "WHERE pc.post_id = ?";
+        try (Connection c = DBUtil.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setInt(1, postId);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    Category c = new Category();
-                    c.setId(rs.getInt("id"));
-                    c.setName(rs.getString("name"));
-                    out.add(c);
+                    Category cat = new Category();
+                    cat.setId(rs.getInt("id"));
+                    cat.setName(rs.getString("name"));
+                    result.add(cat);
                 }
             }
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Ошибка чтения категорий поста", e);
         }
-        return out;
+        return result;
+    }
+    public void addMapping(int postId, int categoryId) {
+        String sql = "INSERT INTO post_category(post_id, category_id) VALUES(?, ?)";
+        try (Connection c = DBUtil.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setInt(1, postId);
+            ps.setInt(2, categoryId);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("Ошибка добавления категории к посту", e);
+        }
     }
 }

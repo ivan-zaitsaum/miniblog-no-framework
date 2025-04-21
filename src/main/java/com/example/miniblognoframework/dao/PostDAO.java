@@ -245,4 +245,107 @@ public class PostDAO {
         return posts;
     }
 
+    public List<Post> getPostsByCategory(int categoryId, int page) {
+        List<Post> posts = new ArrayList<>();
+        String sql =
+                "SELECT p.id, p.title, p.content, p.created_at, p.user_id, u.username " +
+                        "FROM posts p " +
+                        "JOIN post_category pc ON p.id = pc.post_id " +
+                        "LEFT JOIN users u ON p.user_id = u.id " +
+                        "WHERE p.status='PUBLISHED' AND pc.category_id = ? " +
+                        "ORDER BY p.created_at DESC " +
+                        "LIMIT ?, ?";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            int offset = (page - 1) * PAGE_SIZE;
+            stmt.setInt(1, categoryId);
+            stmt.setInt(2, offset);
+            stmt.setInt(3, PAGE_SIZE);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Post p = new Post();
+                    p.setId(rs.getInt("id"));
+                    p.setTitle(rs.getString("title"));
+                    p.setContent(rs.getString("content"));
+                    p.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
+                    p.setUserId(rs.getInt("user_id"));
+                    p.setUsername(rs.getString("username"));
+                    posts.add(p);
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Ошибка выборки постов по категории", e);
+        }
+        return posts;
+    }
+
+    public int countPostsByCategory(int categoryId) {
+        String sql =
+                "SELECT COUNT(*) FROM posts p " +
+                        "JOIN post_category pc ON p.id = pc.post_id " +
+                        "WHERE p.status='PUBLISHED' AND pc.category_id = ?";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, categoryId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                return rs.next() ? rs.getInt(1) : 0;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Ошибка подсчёта постов по категории", e);
+        }
+    }
+
+    public List<Post> getPostsByTag(int tagId, int page) {
+        List<Post> posts = new ArrayList<>();
+        String sql =
+                "SELECT p.id, p.title, p.content, p.created_at, p.user_id, u.username " +
+                        "FROM posts p " +
+                        "JOIN post_tag pt ON p.id = pt.post_id " +
+                        "LEFT JOIN users u ON p.user_id = u.id " +
+                        "WHERE p.status='PUBLISHED' AND pt.tag_id = ? " +
+                        "ORDER BY p.created_at DESC " +
+                        "LIMIT ?, ?";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            int offset = (page - 1) * PAGE_SIZE;
+            stmt.setInt(1, tagId);
+            stmt.setInt(2, offset);
+            stmt.setInt(3, PAGE_SIZE);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Post p = new Post();
+                    p.setId(rs.getInt("id"));
+                    p.setTitle(rs.getString("title"));
+                    p.setContent(rs.getString("content"));
+                    p.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
+                    p.setUserId(rs.getInt("user_id"));
+                    p.setUsername(rs.getString("username"));
+                    posts.add(p);
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Ошибка выборки постов по тегу", e);
+        }
+        return posts;
+    }
+
+    public int countPostsByTag(int tagId) {
+        String sql =
+                "SELECT COUNT(*) FROM posts p " +
+                        "JOIN post_tag pt ON p.id = pt.post_id " +
+                        "WHERE p.status='PUBLISHED' AND pt.tag_id = ?";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, tagId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                return rs.next() ? rs.getInt(1) : 0;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Ошибка подсчёта постов по тегу", e);
+        }
+    }
+
+
+
+
 }
