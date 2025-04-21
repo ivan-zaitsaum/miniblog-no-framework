@@ -114,4 +114,18 @@ public class UserDAO {
             throw new RuntimeException(e);
         }
     }
+
+    public void updateUsername(int userId, String newUsername) {
+        String sql = "UPDATE users SET username = ? WHERE id = ?";
+        try (Connection c = getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+
+            ps.setString(1, newUsername);
+            ps.setInt(2, userId);
+            ps.executeUpdate();
+
+        } catch (SQLException e) {
+            throw new RuntimeException("error to update user name", e);
+        }
+    }
 }

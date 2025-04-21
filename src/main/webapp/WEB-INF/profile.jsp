@@ -143,9 +143,65 @@
     </button>
   </form>
 
-  <p><strong>Username:</strong> <%=currentUser.getUsername()%></p>
   <p><strong>Email:</strong>    <%=currentUser.getEmail()%></p>
+  <div id="username-display" style="margin-bottom:10px;">
+    <strong>Username:</strong> <span id="username-text"><%=currentUser.getUsername()%></span>
+    <button type="button" id="change-username-btn"
+            style="margin-left:10px;
+                 background:var(--link-color);
+                 color:var(--bg-color);
+                 border:none;
+                 padding:4px 8px;
+                 border-radius:4px;
+                 cursor:pointer;">
+      Change
+    </button>
+  </div>
+
+  <!-- Скрытая форма редактирования -->
+  <div id="username-edit" style="display:none; margin-bottom:10px;">
+    <form method="post"
+          action="<%=request.getContextPath()%>/update-profile"
+          style="display:inline-block;">
+      <input type="text"
+             name="username"
+             value="<%=currentUser.getUsername()%>"
+             required
+             style="padding:4px; margin-right:6px;"/>
+      <button type="submit"
+              style="background:var(--link-color);
+                   color:var(--bg-color);
+                   border:none;
+                   padding:4px 8px;
+                   border-radius:4px;
+                   cursor:pointer;">
+        Save
+      </button>
+      <button type="button" id="cancel-username-btn"
+              style="margin-left:4px;
+                   background:#ccc;
+                   color:#000;
+                   border:none;
+                   padding:4px 8px;
+                   border-radius:4px;
+                   cursor:pointer;">
+        Cancel
+      </button>
+    </form>
+  </div>
 </div>
+  <script>
+    // Показываем форму редактирования
+    document.getElementById('change-username-btn').addEventListener('click', function(){
+      document.getElementById('username-display').style.display = 'none';
+      document.getElementById('username-edit').style.display    = 'block';
+    });
+    // Отменяем изменение
+    document.getElementById('cancel-username-btn').addEventListener('click', function(){
+      document.getElementById('username-edit').style.display    = 'none';
+      document.getElementById('username-display').style.display = 'block';
+    });
+  </script>
 
 <h2>Your Posts</h2>
 <% if (myPosts == null || myPosts.isEmpty()) { %>
