@@ -68,6 +68,15 @@
     </servlet-mapping>
 
     <servlet>
+        <servlet-name>DeletePostProfileServlet</servlet-name>
+        <servlet-class>com.example.miniblognoframework.servlet.DeletePostProfileServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>DeletePostProfileServlet</servlet-name>
+        <url-pattern>/delete-postp</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
         <servlet-name>ViewPostServlet</servlet-name>
         <servlet-class>com.example.miniblognoframework.servlet.FormServlet</servlet-class>
     </servlet>

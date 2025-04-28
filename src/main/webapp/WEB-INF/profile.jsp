@@ -183,7 +183,7 @@
 
   <div class="actions">
     <a href="${pageContext.request.contextPath}/edit-post?id=<%= post.getId() %>">Edit</a>
-    <a href="${pageContext.request.contextPath}/delete-post?id=<%= post.getId() %>">Delete</a>
+    <a href="${pageContext.request.contextPath}/delete-postp?id=<%= post.getId() %>">Delete</a>
   </div>
 </div>
 <%   }
