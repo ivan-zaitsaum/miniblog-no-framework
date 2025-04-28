@@ -1,12 +1,15 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page import="com.example.miniblognoframework.model.User" %>
+<!DOCTYPE html>
 <html>
 <head>
-  <title>Registration</title>
+  <meta charset="UTF-8">
+  <title>User Registration</title>
 
   <!-- 1) Общий CSS для тем -->
   <link rel="stylesheet" href="${pageContext.request.contextPath}/css/theme.css">
 
-  <!-- 2) Локальные стили формы регистрации (используют CSS-переменные) -->
+  <!-- 2) Локальные стили формы регистрации -->
   <style>
     body {
       margin: 0; padding: 20px;
@@ -16,11 +19,12 @@
     }
     .nav {
       margin-bottom: 20px;
+      text-align: center;
     }
     .nav a {
       text-decoration: none;
       color: var(--link-color);
-      margin-right: 15px;
+      margin: 0 10px;
     }
     .form-container {
       background-color: var(--card-bg);
@@ -69,12 +73,10 @@
       color: var(--link-color);
       text-decoration: none;
     }
-
     /* Кнопка переключения темы */
     #theme-toggle {
       position: fixed;
-      top: 10px;
-      right: 10px;
+      top: 10px; right: 10px;
       background: var(--link-color);
       color: var(--bg-color);
       border: none;
@@ -85,43 +87,56 @@
     }
   </style>
 
-  <!-- 3) Скрипт для переключения темы -->
+  <!-- 3) Скрипт переключения темы -->
   <script src="${pageContext.request.contextPath}/js/theme.js" defer></script>
 </head>
 <body>
 <!-- 4) Кнопка-переключатель темы -->
 <button id="theme-toggle" onclick="toggleTheme()">Toggle Theme</button>
 
+<%-- Получаем user из сессии, если залогинен --%>
+<%
+  User currentUser = (User) session.getAttribute("user");
+%>
+
 <!-- Навигация -->
 <div class="nav">
-  <a href="<%= request.getContextPath() %>/posts">Main</a> |
-  <a href="<%= request.getContextPath() %>/login.jsp">Login</a>
+  <a href="${pageContext.request.contextPath}/posts">Main</a>
+  <% if (currentUser == null) { %>
+  <a href="${pageContext.request.contextPath}/login.jsp">Login</a>
+  <a href="${pageContext.request.contextPath}/register">Register</a>
+  <% } else { %>
+  <a href="${pageContext.request.contextPath}/add-post">Add Post</a>
+  <a href="${pageContext.request.contextPath}/profile">Profile</a>
+  <a href="${pageContext.request.contextPath}/logout">Logout</a>
+  &nbsp;Welcome, <strong><%= currentUser.getUsername() %></strong>
+  <% } %>
 </div>
 
 <!-- Форма регистрации -->
 <div class="form-container">
   <h1>User Registration</h1>
-  <form action="<%= request.getContextPath() %>/register" method="post">
+  <form action="${pageContext.request.contextPath}/register" method="post">
     <label for="username">Username:</label>
-    <input type="text" id="username"   name="username" required>
+    <input type="text" id="username" name="username" required />
 
     <label for="email">Email:</label>
-    <input type="email" id="email"      name="email"    required>
+    <input type="email" id="email" name="email" required />
 
     <label for="password">Password:</label>
-    <input type="password" id="password" name="password" required>
+    <input type="password" id="password" name="password" required />
 
-    <input type="submit" value="Register">
+    <input type="submit" value="Register" />
   </form>
   <p style="text-align:center;">
     Already registered?
-    <a href="<%= request.getContextPath() %>/login.jsp">Login</a>
+    <a href="${pageContext.request.contextPath}/login.jsp">Login</a>
   </p>
 </div>
 
 <div class="back-link">
   <p>
-    <a href="<%= request.getContextPath() %>/posts">Back to Home Page</a>
+    <a href="${pageContext.request.contextPath}/posts">Back to Home Page</a>
   </p>
 </div>
 </body>

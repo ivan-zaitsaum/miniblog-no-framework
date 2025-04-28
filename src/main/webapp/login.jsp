@@ -1,8 +1,13 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ page import="java.util.List" %>
 <%@ page import="com.example.miniblognoframework.model.User" %>
+<%
+  // Получаем текущего пользователя из request (AuthFilter)
+  User currentUser = (User) request.getAttribute("user");
+%>
+<!DOCTYPE html>
 <html>
 <head>
+  <meta charset="UTF-8">
   <title>Login</title>
 
   <!-- 1) Общий CSS для тем -->
@@ -55,11 +60,12 @@
     /* навигация */
     .nav {
       margin-bottom: 20px;
+      text-align: center;
     }
     .nav a {
       text-decoration: none;
       color: var(--link-color);
-      margin-right: 15px;
+      margin: 0 10px;
     }
     /* Кнопка переключения темы */
     #theme-toggle {
@@ -85,8 +91,16 @@
 
 <!-- Навигация -->
 <div class="nav">
-  <a href="<%= request.getContextPath() %>/posts">Main</a> |
-  <a href="<%= request.getContextPath() %>/registration.jsp">Registration</a>
+  <a href="${pageContext.request.contextPath}/posts">Main</a>
+  <% if (currentUser == null) { %>
+  <a href="${pageContext.request.contextPath}/registration.jsp">Registration</a>
+  <a href="${pageContext.request.contextPath}/login.jsp">Login</a>
+  <% } else { %>
+  <a href="${pageContext.request.contextPath}/add-post">Add Post</a>
+  <a href="${pageContext.request.contextPath}/profile">Profile</a>
+  <a href="${pageContext.request.contextPath}/logout">Logout</a>
+  Welcome, <strong><%= currentUser.getUsername() %></strong>
+  <% } %>
 </div>
 
 <!-- Форма логина -->
@@ -96,7 +110,7 @@
   <% if ("1".equals(error)) { %>
   <p style="color:red;">Invalid username or password.</p>
   <% } %>
-  <form action="<%= request.getContextPath() %>/login" method="post">
+  <form action="${pageContext.request.contextPath}/login" method="post">
     <label for="username">User name:</label>
     <input type="text" id="username" name="username" required>
 
@@ -106,7 +120,7 @@
     <input type="submit" value="Login">
   </form>
   <p>No account?
-    <a href="<%= request.getContextPath() %>/registration.jsp">Registration</a>
+    <a href="${pageContext.request.contextPath}/registration.jsp">Registration</a>
   </p>
 </div>
 </body>

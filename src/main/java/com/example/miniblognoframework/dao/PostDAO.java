@@ -208,13 +208,44 @@ public class PostDAO {
         }
     }
 
-    public void deletePost(int id) {
-        String sql = "DELETE FROM posts WHERE id = ?";
-        try (Connection conn = DBUtil.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+    public void deletePost(int postId) {
+        String sqlDelCats = "DELETE FROM post_category WHERE post_id = ?";
+        String sqlDelTags = "DELETE FROM post_tag      WHERE post_id = ?";
+        String sqlDelComm = "DELETE FROM comments       WHERE post_id = ?";
+        String sqlDelPost = "DELETE FROM posts          WHERE id      = ?";
 
-            stmt.setInt(1, id);
-            stmt.executeUpdate();
+        try (Connection conn = DBUtil.getConnection()) {
+            conn.setAutoCommit(false);
+            try (
+                    PreparedStatement psCats = conn.prepareStatement(sqlDelCats);
+                    PreparedStatement psTags = conn.prepareStatement(sqlDelTags);
+                    PreparedStatement psComm = conn.prepareStatement(sqlDelComm);
+                    PreparedStatement psPost = conn.prepareStatement(sqlDelPost)
+            ) {
+                // 1) связи с категориями
+                psCats.setInt(1, postId);
+                psCats.executeUpdate();
+
+                // 2) связи с тегами
+                psTags.setInt(1, postId);
+                psTags.executeUpdate();
+
+                // 3) комментарии
+                psComm.setInt(1, postId);
+                psComm.executeUpdate();
+
+                // 4) сам пост
+                psPost.setInt(1, postId);
+                int cnt = psPost.executeUpdate();
+                if (cnt==0) throw new SQLException("Пост не найден, id="+postId);
+
+                conn.commit();
+            } catch (SQLException ex) {
+                conn.rollback();
+                throw ex;
+            } finally {
+                conn.setAutoCommit(true);
+            }
         } catch (SQLException e) {
             throw new RuntimeException("Ошибка удаления поста", e);
         }

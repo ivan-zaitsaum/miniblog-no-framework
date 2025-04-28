@@ -1,13 +1,14 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ page import="java.util.List" %>
-<%@ page import="com.example.miniblognoframework.model.User" %>
-<%@ page import="com.example.miniblognoframework.model.Category" %>
-<%@ page import="com.example.miniblognoframework.model.Tag" %>
-
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<!DOCTYPE html>
 <html>
 <head>
+    <meta charset="UTF-8">
     <title>Add Post</title>
+
+    <!-- Общий CSS для тем -->
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/theme.css">
+
     <style>
         body {
             background-color: var(--bg-color);
@@ -75,7 +76,6 @@
             color: var(--link-color);
             text-decoration: none;
         }
-        /* 3) Стили для кнопки переключения темы */
         #theme-toggle {
             position: fixed;
             top: 10px;
@@ -93,28 +93,26 @@
     <script src="${pageContext.request.contextPath}/js/theme.js" defer></script>
 </head>
 <body>
+<button id="theme-toggle" onclick="toggleTheme()">Toggle Theme</button>
+
+<!-- Навигация/хедер -->
 <div id="header">
-    <%
-        User user = (User) session.getAttribute("user");
-        if (user!=null) {
-    %>
-    Welcome, <strong><%=user.getUsername()%></strong>!
-    <a href="<%=request.getContextPath()%>/logout">Logout</a>
-    <%
-    } else {
-    %>
-    <a href="<%=request.getContextPath()%>/login.jsp">Login</a>
-    <a href="<%=request.getContextPath()%>/registration.jsp">Register</a>
-    <%
-        }
-    %>
+    <a href="${pageContext.request.contextPath}/posts">Home</a>
+    <c:choose>
+        <c:when test="${empty user}">
+            <a href="${pageContext.request.contextPath}/registration.jsp">Register</a>
+            <a href="${pageContext.request.contextPath}/login.jsp">Login</a>
+        </c:when>
+        <c:otherwise>
+            <a href="${pageContext.request.contextPath}/add-post">Add Post</a>
+            <a href="${pageContext.request.contextPath}/profile">Profile</a>
+            <a href="${pageContext.request.contextPath}/logout">Logout</a>
+            Welcome, <strong>${user.username}</strong>
+        </c:otherwise>
+    </c:choose>
 </div>
 
 <div class="form-container">
-
-
-
-    <!-- ==== 3) Основная форма создания поста ==== -->
     <h1>Add a New Post</h1>
     <form method="post" action="${pageContext.request.contextPath}/add-post">
         <label for="title">Title:</label>
@@ -123,40 +121,30 @@
         <label for="content">Content:</label>
         <textarea id="content" name="content" rows="5" required></textarea>
 
-        <!-- Существующие категории -->
         <fieldset>
             <legend>Categories</legend>
-            <%
-                List<Category> cats = (List<Category>)request.getAttribute("allCategories");
-                if (cats!=null) for (Category c:cats) {
-            %>
-            <label>
-                <input type="checkbox" name="categoryIds" value="<%=c.getId()%>"/>
-                <%=c.getName()%>
-            </label><br/>
-            <%
-                    }
-            %>
+            <c:forEach var="c" items="${allCategories}">
+                <label>
+                    <input type="checkbox" name="categoryIds" value="${c.id}"/>
+                        ${c.name}
+                </label><br/>
+            </c:forEach>
         </fieldset>
 
-        <!-- Существующие теги -->
         <fieldset>
             <legend>Tags</legend>
-            <%
-                List<Tag> tags = (List<Tag>)request.getAttribute("allTags");
-                if (tags!=null) for (Tag t:tags) {
-            %>
-            <label>
-                <input type="checkbox" name="tagIds" value="<%=t.getId()%>"/>
-                <%=t.getName()%>
-            </label><br/>
-            <%
-                    }
-            %>
+            <c:forEach var="t" items="${allTags}">
+                <label>
+                    <input type="checkbox" name="tagIds" value="${t.id}"/>
+                        ${t.name}
+                </label><br/>
+            </c:forEach>
         </fieldset>
 
         <button type="submit">Submit Post</button>
     </form>
+
+    <hr/>
 
     <h2>Add Category</h2>
     <form method="post" action="${pageContext.request.contextPath}/add-category">
@@ -166,17 +154,15 @@
 
     <hr/>
 
-    <!-- ==== 2) Форма добавления тега ==== -->
     <h2>Add Tag</h2>
     <form method="post" action="${pageContext.request.contextPath}/add-tag">
         <input type="text" name="name" placeholder="Tag name" required/>
         <button type="submit">Add Tag</button>
     </form>
-
-    <hr/>
-
 </div>
 
-<p><a href="<%=request.getContextPath()%>/posts">Back to Home Page</a></p>
+<div class="back-link">
+    <p><a href="${pageContext.request.contextPath}/posts">Back to Home Page</a></p>
+</div>
 </body>
 </html>

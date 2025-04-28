@@ -2,30 +2,51 @@ package com.example.miniblognoframework.servlet;
 
 import com.example.miniblognoframework.dao.UserDAO;
 import com.example.miniblognoframework.model.User;
-
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
+import org.mindrot.jbcrypt.BCrypt;
 
 import java.io.IOException;
 
 @WebServlet("/register")
 public class RegistrationServlet extends HttpServlet {
-    private final UserDAO userDAO = new UserDAO();
+    private UserDAO userDAO;
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+    public void init() throws ServletException {
+        userDAO = new UserDAO();
+    }
+
+    // Показываем форму registration.jsp
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        request.setCharacterEncoding("UTF-8");
+        req.getRequestDispatcher("/registration.jsp")
+                .forward(req, resp);
+    }
 
-        String username = request.getParameter("username");
-        String email = request.getParameter("email");
-        String password = request.getParameter("password");
+    // Обрабатываем отправку формы
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+            throws ServletException, IOException {
+        req.setCharacterEncoding("UTF-8");
 
-        User user = new User(username, email, password, "User");
+        String username = req.getParameter("username");
+        String email    = req.getParameter("email");
+        String password = req.getParameter("password");
+
+
+
+        // Создаём юзера и сохраняем
+        User user = new User();
+        user.setUsername(username);
+        user.setEmail(email);
+        user.setPassword(password);
+        user.setRole("User"); // или какую у вас роль по умолчанию
         userDAO.addUser(user);
 
-        // Перенаправляем на страницу логина после регистрации
-        response.sendRedirect(request.getContextPath() + "/login.jsp");
+        // После регистрации — редирект на логин
+        resp.sendRedirect(req.getContextPath() + "/login.jsp");
     }
 }

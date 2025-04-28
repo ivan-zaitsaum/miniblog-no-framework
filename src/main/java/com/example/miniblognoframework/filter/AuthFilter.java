@@ -1,35 +1,67 @@
 package com.example.miniblognoframework.filter;
 
+import com.example.miniblognoframework.dao.UserDAO;
 import com.example.miniblognoframework.model.User;
+import com.example.miniblognoframework.utils.JwtUtil;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.*;
-import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.*;
-
 import java.io.IOException;
 
-@WebFilter(urlPatterns = {"/posts/*", "/addPost", "/editPost", "/deletePost", "/addComment"})
 public class AuthFilter implements Filter {
+
+    private UserDAO userDAO;
+
+    @Override
+    public void init(FilterConfig filterConfig) {
+        userDAO = new UserDAO();
+    }
+
     @Override
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain)
             throws IOException, ServletException {
         HttpServletRequest  request  = (HttpServletRequest) req;
         HttpServletResponse response = (HttpServletResponse) res;
-        HttpSession session = request.getSession(false);
 
-        User user = (session != null) ? (User) session.getAttribute("user") : null;
+        User user = null;
+
+        // 1) Попытка JWT
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            try {
+                String username = JwtUtil.validateToken(authHeader.substring(7));
+                user = userDAO.getUserByUsername(username);
+            } catch (JwtException ignored) { }
+        }
+
+        // 2) Если не получилось — пробуем сессию
         if (user == null) {
-            // неавторизованные — на страницу логина
-            response.sendRedirect(request.getContextPath() + "/login.jsp?redirect=" + request.getRequestURI());
+            HttpSession session = request.getSession(false);
+            if (session != null) {
+                user = (User) session.getAttribute("user");
+            }
+        }
+
+        if (user != null) {
+            // кладём сразу объект User в request
+            request.setAttribute("user", user);
+            chain.doFilter(req, res);
             return;
         }
 
-        // пример авторизации по роли для админ‑операций
-        String path = request.getServletPath();
-        if ((path.equals("/deletePost") || path.equals("/editPost")) && !"ADMIN".equals(user.getRole())) {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Недостаточно прав");
-            return;
+        // 3) Не авторизован ни через JWT, ни через сессию
+        if ("GET".equalsIgnoreCase(request.getMethod())) {
+            // перенаправляем на форму
+            response.sendRedirect(request.getContextPath()
+                    + "/login.jsp?redirect=" + request.getRequestURI());
+        } else {
+            // JSON-ответ для Ajax/Fetch
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json; charset=UTF-8");
+            response.getWriter().write("{\"error\":\"Unauthorized\"}");
         }
-
-        chain.doFilter(req, res);
     }
+
+    @Override
+    public void destroy() { }
 }
